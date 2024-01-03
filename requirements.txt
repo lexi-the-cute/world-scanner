@@ -1,0 +1,3 @@
+-e git+ssh://git@github.com/lexi-the-cute/anvil-parser.git@2c4bd64923d3c14ce7d2ead84a51c99cacf0f7f7#egg=anvil_parser
+frozendict==2.4.0
+NBT==1.5.1
