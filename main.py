@@ -5,6 +5,9 @@ import argparse
 from typing import Union, List
 
 def get_dimension_folders(dimension_folder_root: str) -> list[str]:
+    if not os.path.exists(dimension_folder_root):
+        return []
+
     dimensions: list[str] = []
     for namespace in os.listdir(dimension_folder_root):
         namespace_path: str = os.path.join(dimension_folder_root, namespace)
@@ -57,6 +60,11 @@ def get_blocks(region_file_path: str, hidden_blocks: List[str] = []):
 
     try:
         region = anvil.Region.from_file(region_file_path)
+
+        split_filename: List[str] = region_file_path.split("/")[-1].split(".")
+        region_x: int = int(split_filename[1])
+        region_z: int = int(split_filename[2])
+        # print("Region: (%s, %s)" % (region_x, region_z))
     except anvil.errors.EmptyRegionFile as e:
         return
 
@@ -65,10 +73,16 @@ def get_blocks(region_file_path: str, hidden_blocks: List[str] = []):
             try:
                 chunk = anvil.Chunk.from_region(region, chunk_x, chunk_z)
                 for block, block_x, block_y, block_z in get_blocks_in_chunk(chunk):
-                    block_entity = chunk.get_block_entity(block_x, block_y, block_z)
-
                     if ("%s:%s" % (block.namespace, block.id)) not in hidden_blocks:
-                        yield block_x, block_y, block_z, block, block_entity
+                        region_chunk_x: int = (32*region_x)+chunk_x
+                        region_chunk_z: int = (32*region_z)+chunk_z
+
+                        global_block_x: int = (16*region_chunk_x)+block_x
+                        global_block_z: int = (16*region_chunk_z)+block_z
+
+                        block_entity = chunk.get_block_entity(global_block_x, block_y, global_block_z)
+
+                        yield global_block_x, block_y, global_block_z, block, block_entity
             except anvil.errors.ChunkNotFound as e:
                 pass
             except anvil.errors.OutOfBoundsCoordinates as e:
@@ -97,7 +111,7 @@ def get_block_entities(region_file_path: str, hidden_blocks: List[str] = []):
                     block_x: int = block_entity["x"].value
                     block_y: int = block_entity["y"].value
                     block_z: int = block_entity["z"].value
-                    block: anvil.Block = chunk.get_block(x=block_x, y=block_y, z=block_z)
+                    block: anvil.Block = chunk.get_block(x=(block_x % 16), y=block_y, z=(block_z % 16))
 
                     if ("%s:%s" % (block.namespace, block.id)) not in hidden_blocks:
                         yield block_x, block_y, block_z, block, block_entity
@@ -125,7 +139,7 @@ if __name__ == "__main__":
 
     # Get Blocks From a Specific Region File
     # for block_x, block_y, block_z, block, block_entity in get_blocks(region_file_path="world/region/r.0.0.mca", hidden_blocks=args.hidden_blocks):
-    #     print("Block: (%i, %i, %i): %s - BlockEntity: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity))
+    #     print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
 
     # Get Blocks From All Region Files
     # for region_folder_paths in region_folders_paths:
@@ -133,11 +147,11 @@ if __name__ == "__main__":
 
     #     for region_files_path in region_files_paths:
     #         for block_x, block_y, block_z, block, block_entity in get_blocks(region_file_path=region_files_path, hidden_blocks=args.hidden_blocks):
-    #             print("Block: (%i, %i, %i): %s - BlockEntity: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity))
+    #             print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
 
     # Get Block Entities From a Specific Region File
     # for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path="world/region/r.0.0.mca", hidden_blocks=args.hidden_blocks):
-    #     print("Block: (%i, %i, %i): %s - BlockEntity: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity))
+    #     print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
 
     # Get Block Entities From All Region Files
     for region_folder_paths in region_folders_paths:
@@ -145,4 +159,4 @@ if __name__ == "__main__":
 
         for region_files_path in region_files_paths:
             for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path=region_files_path, hidden_blocks=args.hidden_blocks):
-                print("Block: (%i, %i, %i): %s - BlockEntity: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity))
+                print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
