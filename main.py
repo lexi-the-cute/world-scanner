@@ -1,4 +1,5 @@
 import os
+import sys
 import anvil
 import argparse
 
@@ -85,11 +86,16 @@ def get_blocks(region_file_path: str, hidden_blocks: List[str] = []):
                         yield global_block_x, block_y, global_block_z, block, block_entity
             except anvil.errors.ChunkNotFound as e:
                 pass
+            except anvil.errors.CorruptedData as e:
+                # with open("corrupted.nbt", "wb") as corrupted_nbt_data:
+                #     corrupted_nbt_data.write(e.args[0]['data'])
+
+                print("CorruptedData: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e.args[0]['message']), file=sys.stderr)
             except anvil.errors.OutOfBoundsCoordinates as e:
-                print("OutOfBoundsCoordinates: %s" % e)
+                print("OutOfBoundsCoordinates: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
             # except Exception as e:
             #     pass
-            #     print("Exception: %s" % e)
+            #     print("Exception: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
     
     # print("")
     print("-"*40)
@@ -123,11 +129,18 @@ def get_block_entities(region_file_path: str, hidden_blocks: List[str] = []):
                         yield block_x, block_y, block_z, block, block_entity
             except anvil.errors.ChunkNotFound as e:
                 pass
+            except anvil.errors.EmptyRegionFile as e:
+                pass
+            except anvil.errors.CorruptedData as e:
+                # with open("corrupted.nbt", "wb") as corrupted_nbt_data:
+                #     corrupted_nbt_data.write(e.args[0]['data'])
+
+                print("CorruptedData: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e.args[0]['message']), file=sys.stderr)
             except anvil.errors.OutOfBoundsCoordinates as e:
-                print("OutOfBoundsCoordinates: %s" % e)
+                print("OutOfBoundsCoordinates: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
             # except Exception as e:
             #     pass
-            #     print("Exception: %s" % e)
+            #     print("Exception: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
     
     # print("")
     print("-"*40)
@@ -158,13 +171,13 @@ if __name__ == "__main__":
     # Get Block Entities From a Specific Region File
     # TODO: (Test Fix) Main Coordinates: (3, 84, 40) - Chunk Block Debug: (3, 4, 8)
     # TODO: (Test Fix) Block: (3, 84, 40): minecraft:air - BlockEntity: {TAG_Int('z'): 40, TAG_Int('x'): 3, TAG_String('id'): minecraft:chest, TAG_Int('y'): 84, TAG_List('Items'): [1 TAG_Compound(s)], TAG_Byte('keepPacked'): 0} - Properties: {}
-    # for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path="world/region/r.0.0.mca", hidden_blocks=args.hidden_blocks):
-    #     print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
+    for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path="world/region/r.3.3.mca", hidden_blocks=args.hidden_blocks):
+        print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
 
     # Get Block Entities From All Region Files
-    for region_folder_paths in region_folders_paths:
-        region_files_paths: list[str] = get_region_files(region_folder_path=region_folder_paths)
+    # for region_folder_paths in region_folders_paths:
+    #     region_files_paths: list[str] = get_region_files(region_folder_path=region_folder_paths)
 
-        for region_files_path in region_files_paths:
-            for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path=region_files_path, hidden_blocks=args.hidden_blocks):
-                print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
+    #     for region_files_path in region_files_paths:
+    #         for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path=region_files_path, hidden_blocks=args.hidden_blocks):
+    #             print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
