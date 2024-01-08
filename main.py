@@ -111,9 +111,15 @@ def get_block_entities(region_file_path: str, hidden_blocks: List[str] = []):
                     block_x: int = block_entity["x"].value
                     block_y: int = block_entity["y"].value
                     block_z: int = block_entity["z"].value
-                    block: anvil.Block = chunk.get_block(x=(block_x % 16), y=block_y, z=(block_z % 16))
+                    
+                    # the chunk reader handles y for us as long as we don't specify a section
+                    chunk_block_x: int = block_x % 16
+                    chunk_block_z: int = block_z % 16
+
+                    block: anvil.Block = chunk.get_block(x=chunk_block_x, y=block_y, z=chunk_block_z)
 
                     if ("%s:%s" % (block.namespace, block.id)) not in hidden_blocks:
+                        print("Global Coordinates: (%s, %s, %s) - Chunk Block Debug: (%s, %s, %s)" % (block_x, block_y, block_z, chunk_block_x, block_y, chunk_block_z))
                         yield block_x, block_y, block_z, block, block_entity
             except anvil.errors.ChunkNotFound as e:
                 pass
@@ -150,6 +156,8 @@ if __name__ == "__main__":
     #             print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
 
     # Get Block Entities From a Specific Region File
+    # TODO: (Test Fix) Main Coordinates: (3, 84, 40) - Chunk Block Debug: (3, 4, 8)
+    # TODO: (Test Fix) Block: (3, 84, 40): minecraft:air - BlockEntity: {TAG_Int('z'): 40, TAG_Int('x'): 3, TAG_String('id'): minecraft:chest, TAG_Int('y'): 84, TAG_List('Items'): [1 TAG_Compound(s)], TAG_Byte('keepPacked'): 0} - Properties: {}
     # for block_x, block_y, block_z, block, block_entity in get_block_entities(region_file_path="world/region/r.0.0.mca", hidden_blocks=args.hidden_blocks):
     #     print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
 
