@@ -119,7 +119,7 @@ def get_block_entities(region_file_path: str, hidden_blocks: List[str] = []):
                     block: anvil.Block = chunk.get_block(x=chunk_block_x, y=block_y, z=chunk_block_z)
 
                     if ("%s:%s" % (block.namespace, block.id)) not in hidden_blocks:
-                        print("Global Coordinates: (%s, %s, %s) - Chunk Block Debug: (%s, %s, %s)" % (block_x, block_y, block_z, chunk_block_x, block_y, chunk_block_z))
+                        # print("Global Coordinates: (%s, %s, %s) - Chunk Block Debug: (%s, %s, %s)" % (block_x, block_y, block_z, chunk_block_x, block_y, chunk_block_z))
                         yield block_x, block_y, block_z, block, block_entity
             except anvil.errors.ChunkNotFound as e:
                 pass
