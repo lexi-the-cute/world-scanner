@@ -24,9 +24,9 @@ def get_region_file_coordinates(path: str):
 
 if __name__ == "__main__":
     dimensions = {
-        "minecraft:the_end": "world/DIM1/region",
         "minecraft:the_nether": "world/DIM-1/region",
-        "minecraft:overworld": "world/region",
+        "minecraft:the_end": "world/DIM1/region",
+        "minecraft:overworld": "world/region"
     }
 
     hidden_blocks = ["minecraft:air"]
@@ -80,6 +80,11 @@ if __name__ == "__main__":
         temp_region_list = processed_region_files
         for processed_region_file in processed_region_files:
             processed_region = processed_region_files[processed_region_file]
+
+            # Only process secondary regions when a primary region is safe
+            if processed_region["safe"] == False and processed_region["force_safe"] == False:
+                continue
+
             for x in range(-1, 2):
                 for z in range(-1, 2):
                     key = "(%i, %i)" % (int(processed_region["x"])+x, int(processed_region["z"])+z)
