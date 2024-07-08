@@ -46,12 +46,24 @@ if __name__ == "__main__":
         print("-"*40)
         for region_file_path in region_files_paths:
             mark_safe: bool = False
+            mark_description: list[dict] = []
             for block_x, block_y, block_z, block, block_entity in world.get_block_entities(region_file_path=region_file_path, hidden_blocks=hidden_blocks):
                 # print("Block Entity: %s - %s" % (block_entity["id"], type(block_entity["id"])))
                 if str(block_entity["id"]) == "waystones:sharestone":
                     # print("‣ Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
                     print("‣ Region: %s - Block: (%i, %i, %i): %s" % (region_file_path, block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id)))
                     mark_safe = True
+                    mark_description.append({
+                        "comment": "Marked safe cause of sharestone at (%i, %i, %i) in region file" % (block_x, block_y, block_z),
+                        "meta": {
+                            "x": block_x,
+                            "y": block_y,
+                            "z": block_z,
+                            "name": "%s:%s" % (block.namespace, block.id)
+                        }
+                    })
+
+                    # Speed up processing since we only need one
                     break
 
                 if str(block_entity["id"]) == "waystones:waystone":
@@ -59,6 +71,17 @@ if __name__ == "__main__":
                         # print("‣ Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
                         print("‣ Region: %s - Block: (%i, %i, %i): %s" % (region_file_path, block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id)))
                         mark_safe = True
+                        mark_description.append({
+                            "comment": "Marked safe cause of player placed waystone at at (%i, %i, %i) in region file" % (block_x, block_y, block_z),
+                            "meta": {
+                                "x": block_x,
+                                "y": block_y,
+                                "z": block_z,
+                                "name": "%s:%s" % (block.namespace, block.id)
+                            }
+                        })
+
+                        # Speed up processing since we only need one
                         break
 
             region_x, region_z = get_region_file_coordinates(path=region_file_path)
@@ -68,6 +91,7 @@ if __name__ == "__main__":
                 "z": int(region_z),
                 "safe": mark_safe,
                 "reason": "primary" if mark_safe else "secondary",
+                "description": mark_description,
                 "force_safe": False,
                 "force_unsafe": False
             }
@@ -80,6 +104,10 @@ if __name__ == "__main__":
         temp_region_list = processed_region_files
         for processed_region_file in processed_region_files:
             processed_region = processed_region_files[processed_region_file]
+
+            # Ensure only primary regions are used as a base for scanning nearby regions
+            if processed_region["reason"] != "primary":
+                continue
 
             # Only process secondary regions when a primary region is safe
             if processed_region["safe"] == False and processed_region["force_safe"] == False:
@@ -97,8 +125,18 @@ if __name__ == "__main__":
                     if temp_region_list[key]["reason"] == "primary":
                         continue
 
-                    if x != 0 and z != 0:
-                        temp_region_list[key]["safe"] = True
+                    if x == 0 and z == 0:
+                        continue
+                    
+                    temp_region_list[key]["safe"] = True
+                    temp_region_list[key]["description"].append({
+                        "comment": "Marked safe by being a neighbor to %s region (%i, %i)" % (processed_region["reason"], processed_region["x"], processed_region["z"]),
+                        "meta": {
+                            "x": processed_region["x"],
+                            "z": processed_region["z"]
+                        }
+                    })
+        
         processed_region_files = temp_region_list
         print("-"*40)
         print()
