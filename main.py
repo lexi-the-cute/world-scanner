@@ -19,12 +19,12 @@ if __name__ == "__main__":
 
     # Get Blocks From All Region Files
     # for region_folder_paths in region_folders_paths:
-    #     region_files_paths: list[str] = world.get_region_files(region_folder_path=region_folder_paths)
+    #     region_files_path: list[str] = world.get_files(folder_path=region_folder_paths)
 
-    #     for region_files_path in region_files_paths:
+    #     for region_file_path in region_files_path:
     #         print("Reading Region file: %s" % region_file_path)
     #         print("-"*40)
-    #         for block_x, block_y, block_z, block, block_entity in world.get_blocks(region_file_path=region_files_path, hidden_blocks=args.hidden_blocks):
+    #         for block_x, block_y, block_z, block, block_entity in world.get_blocks(region_file_path=region_file_path, hidden_blocks=args.hidden_blocks):
     #             print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
     #         print("-"*40)
 
@@ -36,11 +36,11 @@ if __name__ == "__main__":
 
     # Get Block Entities From All Region Files
     for region_folder_paths in region_folders_paths:
-        region_files_paths: list[str] = world.get_region_files(region_folder_path=region_folder_paths)
+        region_files_path: list[str] = world.get_files(folder_path=region_folder_paths)
 
-        for region_files_path in region_files_paths:
+        for region_file_path in region_files_path:
             print("Reading Region file: %s" % region_file_path)
             print("-"*40)
-            for block_x, block_y, block_z, block, block_entity in world.get_block_entities(region_file_path=region_files_path, hidden_blocks=args.hidden_blocks):
+            for block_x, block_y, block_z, block, block_entity in world.get_block_entities(region_file_path=region_file_path, hidden_blocks=args.hidden_blocks):
                 print("Block: (%i, %i, %i): %s - BlockEntity: %s - Properties: %s" % (block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id), block_entity, block.properties))
             print("-"*40)

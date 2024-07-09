@@ -1,0 +1,11 @@
+{
+    "explorer.excludeGitIgnore": true,
+    "search.useGlobalIgnoreFiles": true,
+    "search.useParentIgnoreFiles": true,
+    "Lua.workspace.ignoreDir": [
+        ".vscode",
+        "world",
+        ".venv",
+        "__pycache__"
+    ]
+}

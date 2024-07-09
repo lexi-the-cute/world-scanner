@@ -21,28 +21,61 @@ def get_region_folder(world_folder: str) -> str:
 
 # this is an ease of use function
 def get_region_folders(world_folder_root: str, dimension_folder_root: str) -> list[str]:
-    region_paths: list[str] = []
+    paths: list[str] = []
 
     # main world folder
-    world_region_path: str = get_region_folder(world_folder_root)
-    region_paths.append(world_region_path)
+    paths.append(get_region_folder(world_folder_root))
 
     # dimension folder paths
     dimensions: list[str] = get_dimension_folders(dimension_folder_root)
     for dimension_path in dimensions:
-        region_paths.append(get_region_folder(dimension_path))
+        paths.append(get_region_folder(dimension_path))
 
-    return region_paths
+    return paths
 
-def get_region_files(region_folder_path: str) -> list[str]:
-    if not os.path.exists(region_folder_path):
+def get_entity_folder(world_folder: str) -> str:
+    return os.path.join(world_folder, "entities")
+
+# this is an ease of use function
+def get_entity_folders(world_folder_root: str, dimension_folder_root: str) -> list[str]:
+    paths: list[str] = []
+
+    # main world folder
+    paths.append(get_entity_folder(world_folder_root))
+
+    # dimension folder paths
+    dimensions: list[str] = get_dimension_folders(dimension_folder_root)
+    for dimension_path in dimensions:
+        paths.append(get_entity_folder(dimension_path))
+
+    return paths
+
+def get_poi_folder(world_folder: str) -> str:
+    return os.path.join(world_folder, "poi")
+
+# this is an ease of use function
+def get_poi_folders(world_folder_root: str, dimension_folder_root: str) -> list[str]:
+    paths: list[str] = []
+
+    # main world folder
+    paths.append(get_poi_folder(world_folder_root))
+
+    # dimension folder paths
+    dimensions: list[str] = get_dimension_folders(dimension_folder_root)
+    for dimension_path in dimensions:
+        paths.append(get_poi_folder(dimension_path))
+
+    return paths
+
+def get_files(folder_path: str) -> list[str]:
+    if not os.path.exists(folder_path):
         return []
 
-    region_files_paths: list[str] = []
-    for files in os.listdir(region_folder_path):
-        region_files_paths.append(os.path.join(region_folder_path, files))
+    files_paths: list[str] = []
+    for files in os.listdir(folder_path):
+        files_paths.append(os.path.join(folder_path, files))
 
-    return region_files_paths
+    return files_paths
 
 def get_blocks_in_chunk(chunk: anvil.Chunk):
     # Read Palette Test
@@ -117,6 +150,62 @@ def get_block_entities(region_file_path: str, hidden_blocks: List[str] = []):
                     if ("%s:%s" % (block.namespace, block.id)) not in hidden_blocks:
                         # print("Global Coordinates: (%s, %s, %s) - Chunk Block Debug: (%s, %s, %s)" % (block_x, block_y, block_z, chunk_block_x, block_y, chunk_block_z))
                         yield block_x, block_y, block_z, block, block_entity
+            except anvil.errors.ChunkNotFound as e:
+                pass
+            except anvil.errors.EmptyRegionFile as e:
+                pass
+            except anvil.errors.CorruptedData as e:
+                # with open("corrupted.nbt", "wb") as corrupted_nbt_data:
+                #     corrupted_nbt_data.write(e.args[0]['data'])
+
+                print("CorruptedData: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e.args[0]['message']), file=sys.stderr)
+            except anvil.errors.OutOfBoundsCoordinates as e:
+                print("OutOfBoundsCoordinates: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
+            # except Exception as e:
+            #     pass
+            #     print("Exception: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
+
+# TODO: Implement entity scanning support
+def get_entities(entity_file_path: str, hidden_entities: List[str] = []):
+    try:
+        region = anvil.Region.from_file(region_file_path)
+    except anvil.errors.EmptyRegionFile as e:
+        return
+
+    for chunk_x in range(32):
+        for chunk_z in range(32):
+            try:
+                chunk = anvil.Chunk.from_region(region, chunk_x, chunk_z)
+
+                # TODO: Get entity data: https://minecraft.fandom.com/wiki/Entity_format
+            except anvil.errors.ChunkNotFound as e:
+                pass
+            except anvil.errors.EmptyRegionFile as e:
+                pass
+            except anvil.errors.CorruptedData as e:
+                # with open("corrupted.nbt", "wb") as corrupted_nbt_data:
+                #     corrupted_nbt_data.write(e.args[0]['data'])
+
+                print("CorruptedData: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e.args[0]['message']), file=sys.stderr)
+            except anvil.errors.OutOfBoundsCoordinates as e:
+                print("OutOfBoundsCoordinates: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
+            # except Exception as e:
+            #     pass
+            #     print("Exception: %s (%s, %s): %s" % (region_file_path, chunk_x, chunk_z, e), file=sys.stderr)
+
+# TODO: Implement points of interest scanning support
+def get_pois(poi_file_path: str, hidden_pois: List[str] = []):
+    try:
+        region = anvil.Region.from_file(region_file_path)
+    except anvil.errors.EmptyRegionFile as e:
+        return
+
+    for chunk_x in range(32):
+        for chunk_z in range(32):
+            try:
+                chunk = anvil.Chunk.from_region(region, chunk_x, chunk_z)
+
+                # TODO: Get poi data (stub): https://minecraft.fandom.com/wiki/Point_of_Interest
             except anvil.errors.ChunkNotFound as e:
                 pass
             except anvil.errors.EmptyRegionFile as e:
