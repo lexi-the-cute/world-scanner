@@ -2,6 +2,7 @@ import os
 import argparse
 import world
 import json
+import datetime
 
 def record_regions(dimension: str, processed_region_files: dict):
     output_directory: str = os.path.join("world", "project-regen")
@@ -84,8 +85,34 @@ if __name__ == "__main__":
                         # Speed up processing since we only need one
                         break
 
+                # Check for Chunkloaders
+                chunkloader_ids = [
+                    # "createchunkloading:chunk_loader",  # Doesn't have a block entity
+                    "chunkloaders:single_chunk_loader_tile",
+                    "chunkloaders:basic_chunk_loader_tile",
+                    "chunkloaders:advanced_chunk_loader_tile",
+                    "chunkloaders:ultimate_chunk_loader_tile",
+                    "techreborn:chunk_loader"
+                ]
+                if str(block_entity["id"]) in chunkloader_ids:
+                    print("‣ Region: %s - Block: (%i, %i, %i): %s" % (region_file_path, block_x, block_y, block_z, "%s:%s" % (block.namespace, block.id)))
+                    mark_safe = True
+                    mark_description.append({
+                        "comment": "Marked safe cause of chunk loader at at (%i, %i, %i) in region file" % (block_x, block_y, block_z),
+                        "meta": {
+                            "x": block_x,
+                            "y": block_y,
+                            "z": block_z,
+                            "name": "%s:%s" % (block.namespace, block.id)
+                        }
+                    })
+
+            # Get current timezone aware datetime
+            timestamp = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S%z")
+
             region_x, region_z = get_region_file_coordinates(path=region_file_path)
             processed_region_files["(%i, %i)" % (region_x, region_z)] = {
+                "timestamp": timestamp,
                 "path": region_file_path,
                 "x": int(region_x),
                 "z": int(region_z),
