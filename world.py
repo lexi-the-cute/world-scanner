@@ -177,7 +177,7 @@ def get_entities(entity_file_path: str, hidden_entities: List[str] = []):
             try:
                 chunk = anvil.Chunk.from_region(region, chunk_x, chunk_z)
 
-                # TODO: Get entity data: https://minecraft.fandom.com/wiki/Entity_format
+                # TODO: Get entity data: https://minecraft.wiki/w/Entity_format
             except anvil.errors.ChunkNotFound as e:
                 pass
             except anvil.errors.EmptyRegionFile as e:
@@ -205,7 +205,7 @@ def get_pois(poi_file_path: str, hidden_pois: List[str] = []):
             try:
                 chunk = anvil.Chunk.from_region(region, chunk_x, chunk_z)
 
-                # TODO: Get poi data (stub): https://minecraft.fandom.com/wiki/Point_of_Interest
+                # TODO: Get poi data (stub): https://minecraft.wiki/w/Java_Edition_level_format#poi_format
             except anvil.errors.ChunkNotFound as e:
                 pass
             except anvil.errors.EmptyRegionFile as e:
