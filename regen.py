@@ -40,7 +40,7 @@ if __name__ == "__main__":
         # Table of Region Files
         processed_region_files = {}
 
-        region_files_paths: list[str] = world.get_region_files(region_folder_path=region_folder_paths)
+        region_files_paths: list[str] = world.get_files(folder_path=region_folder_paths)
 
         # Mark Primary Regions as Safe
         print("Scanning for primary regions...")
