@@ -34,5 +34,18 @@ if __name__ == "__main__":
                 record = json.loads(line)
 
                 if record["safe"] == False and record["force_safe"] == False:
-                    print("Removing %s..." % record["path"])
-                    os.remove(record["path"])
+                    region = "region"
+                    entity = "entities"
+                    poi = "poi"
+
+                    if os.path.exists(record["path"]):
+                        print("Removing %s..." % record["path"])
+                        os.remove(record["path"])
+
+                    if os.path.exists(record["path"].replace(region, entity)):
+                        print("Removing %s..." % record["path"].replace(region, entity))
+                        os.remove(record["path"].replace(region, entity))
+
+                    if os.path.exists(record["path"].replace(region, poi)):
+                        print("Removing %s..." % record["path"].replace(region, poi))
+                        os.remove(record["path"].replace(region, poi))
